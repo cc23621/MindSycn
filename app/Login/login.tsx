@@ -1,21 +1,65 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View, } from "react-native";
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import api from "../../service/api";
 
 export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
     try {
-      const response = await api.post("/login", { email, senha });
-      Alert.alert("Sucesso", "Login realizado com sucesso!");
-      // Redireciona para a tela principal
-      router.push("/Home/home");
+      const emailClean = email.trim().toLowerCase();
+      const passwordClean = password.trim();
+
+      console.log("Tentando login com:", emailClean, passwordClean);
+
+      const response = await api.post("/auth/login", {
+        email: emailClean,
+        password: passwordClean,
+      });
+
+      const userId = response.data?.user?.id;
+      if (userId) {
+        await AsyncStorage.setItem("userId", String(userId));
+        Alert.alert("Sucesso", "Login realizado com sucesso!");
+        router.push("/Home/home");
+      } else {
+        Alert.alert("Erro", "ID do usuário não encontrado.");
+      }
     } catch (error) {
-      Alert.alert("Erro", "Email ou senha inválidos.");
+      console.log("Erro no login:", error);
+
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error
+      ) {
+        const axiosError = error as {
+          response?: { data?: any; status?: number };
+        };
+        console.log("Resposta do servidor:", axiosError.response?.data);
+        if (axiosError.response?.status === 401) {
+          Alert.alert("Erro", "Usuário não verificado ou senha incorreta.");
+        } else if (axiosError.response?.status === 404) {
+          Alert.alert("Erro", "Usuário não encontrado.");
+        } else {
+          Alert.alert("Erro", "Erro ao realizar login.");
+        }
+      } else {
+        console.log("Erro sem resposta do servidor");
+        Alert.alert("Erro", "Erro ao realizar login.");
+      }
     }
   };
 
@@ -23,25 +67,37 @@ export default function Login() {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Image source={require("../../assets/Arrow 1.png")} style={styles.back} />
+          <Image
+            source={require("../../assets/Arrow 1.png")}
+            style={styles.back}
+          />
         </TouchableOpacity>
 
         <View style={styles.titleRow}>
           <Text style={styles.textHeader}>
             Olá, Bem-Vindo(a) de{"\n"}Volta!
           </Text>
-          <Image source={require("../../assets/logo (3).png")} style={styles.logo} />
+          <Image
+            source={require("../../assets/logo (3).png")}
+            style={styles.logo}
+          />
         </View>
 
         <Text style={styles.text}>
           Não tem uma conta?{" "}
-          <Text style={styles.loginText} onPress={() => router.push("/Cadastro/cadastro")}>
+          <Text
+            style={styles.loginText}
+            onPress={() => router.push("/Cadastro/cadastro")}
+          >
             Cadastre-se
           </Text>
         </Text>
       </View>
 
-      <Image source={require("../../assets/imagem (2).png")} style={styles.imagem} />
+      <Image
+        source={require("../../assets/imagem (2).png")}
+        style={styles.imagem}
+      />
 
       <View style={styles.formContainer}>
         <View style={styles.innerForm}>
@@ -50,6 +106,7 @@ export default function Login() {
             placeholder="Email"
             placeholderTextColor="#ccc"
             keyboardType="email-address"
+            autoCapitalize="none"
             value={email}
             onChangeText={setEmail}
           />
@@ -58,8 +115,8 @@ export default function Login() {
             placeholder="Senha"
             placeholderTextColor="#ccc"
             secureTextEntry
-            value={senha}
-            onChangeText={setSenha}
+            value={password}
+            onChangeText={setPassword}
           />
           <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.buttonText}>Entrar</Text>
@@ -115,10 +172,9 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
     alignSelf: "center",
     marginTop: 10,
-    marginBottom: -40, 
+    marginBottom: -40,
     zIndex: 2,
   },
-  
   formContainer: {
     backgroundColor: "#41BECE",
     flex: 1,
@@ -128,7 +184,6 @@ const styles = StyleSheet.create({
     zIndex: 1,
     paddingTop: 40,
   },
-  
   innerForm: {
     padding: 20,
     marginTop: 30,

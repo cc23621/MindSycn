@@ -20,7 +20,7 @@ export default function Cadastro() {
   const handleCadastro = async () => {
     try {
       const response = await api.post("/auth/register", {
-        name: nome,          // <- usa 'name' para o backend
+        nome,          // <- usa 'name' para o backend
         email,
         password: senha,     // <- usa 'password' para o backend
       });
@@ -31,8 +31,8 @@ export default function Cadastro() {
         "Digite o código que você recebeu:",
         async (otp) => {
           try {
-            const verifyResponse = await api.post("/auth/verify", {
-              name: nome,
+            const verifyResponse = await api.post("/auth/verify-otp", {
+              nome,
               email,
               otp,  // <- usa 'otp' como no backend
             });
