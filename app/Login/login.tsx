@@ -1,15 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import {
-  Alert,
-  Image,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View, } from "react-native";
 import api from "../../service/api";
 
 export default function Login() {
@@ -17,41 +9,41 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = async () => {
+  const handleLogin = async () =>{
     try {
       const emailClean = email.trim().toLowerCase();
       const passwordClean = password.trim();
 
-      console.log("Tentando login com:", emailClean, passwordClean);
+      console.log("Tentando login com:",emailClean, passwordClean);
 
-      const response = await api.post("/auth/login", {
+      const response =await api.post("/auth/login", {
         email: emailClean,
         password: passwordClean,
       });
 
       const userId = response.data?.user?.id;
-      if (userId) {
+      if (userId){
         await AsyncStorage.setItem("userId", String(userId));
         Alert.alert("Sucesso", "Login realizado com sucesso!");
         router.push("/Home/home");
-      } else {
+      } else{
         Alert.alert("Erro", "ID do usuário não encontrado.");
       }
     } catch (error) {
       console.log("Erro no login:", error);
 
-      if (
+      if(
         typeof error === "object" &&
         error !== null &&
         "response" in error
-      ) {
+      ){
         const axiosError = error as {
           response?: { data?: any; status?: number };
         };
         console.log("Resposta do servidor:", axiosError.response?.data);
         if (axiosError.response?.status === 401) {
           Alert.alert("Erro", "Usuário não verificado ou senha incorreta.");
-        } else if (axiosError.response?.status === 404) {
+        }else if (axiosError.response?.status === 404) {
           Alert.alert("Erro", "Usuário não encontrado.");
         } else {
           Alert.alert("Erro", "Erro ao realizar login.");

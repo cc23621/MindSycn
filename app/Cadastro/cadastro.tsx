@@ -1,14 +1,6 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import {
-  Alert,
-  Image,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View, } from "react-native";
 import api from "../../service/api";
 
 export default function Cadastro() {
@@ -20,9 +12,9 @@ export default function Cadastro() {
   const handleCadastro = async () => {
     try {
       const response = await api.post("/auth/register", {
-        nome,          // <- usa 'name' para o backend
+        nome,        
         email,
-        password: senha,     // <- usa 'password' para o backend
+        password: senha,   
       });
   
     
@@ -34,7 +26,7 @@ export default function Cadastro() {
             const verifyResponse = await api.post("/auth/verify-otp", {
               nome,
               email,
-              otp,  // <- usa 'otp' como no backend
+              otp,  
             });
   
             Alert.alert("Sucesso", "Conta verificada com sucesso!");

@@ -38,17 +38,20 @@ export default function Home() {
         <View style={styles.row}>
           <Image source={require("../../assets/educativos.png")} style={styles.exploreImage1} />
           <TouchableOpacity onPress={() => router.push("/Menu-Diario/menu-diario")}>
-  <Image
-    source={require("../../assets/diario.png")}
-    style={styles.exploreImage2}
-  />
+          <Image
+            source={require("../../assets/diario.png")}
+            style={styles.exploreImage2}
+          />
 </TouchableOpacity>
         </View>
 
    
         <View style={styles.row}>
           <Image source={require("../../assets/chatAI.png")} style={styles.exploreImage3} />
+          <TouchableOpacity onPress={()=> router.push("/Grafico/grafico")}>
           <Image source={require("../../assets/grafico (1).png")} style={styles.exploreImage4} />
+          </TouchableOpacity>
+          
         </View>
       </View>
 
