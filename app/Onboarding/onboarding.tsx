@@ -1,9 +1,21 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
+import { useRef, useState } from "react";
+import { Animated, Easing, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function Onboarding() {
     const router = useRouter();
+    const [showOptions, setShowOptions] = useState(false);
+  const slideAnim = useRef(new Animated.Value(300)).current;
 
+  const showFrame = () => {
+    setShowOptions(true);
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 500,
+      easing: Easing.out(Easing.ease),
+      useNativeDriver: true,
+    }).start();
+  };
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -35,7 +47,7 @@ export default function Onboarding() {
           Vamos lá{"\n"}
           Começar!
         </Text>
-        <TouchableOpacity onPress={() => router.push("/Cadastro/cadastro")}>
+        <TouchableOpacity onPress={showFrame}>
           <Image
             source={require("../../assets/Seta.png")}
             style={styles.imagemIr}
@@ -43,6 +55,39 @@ export default function Onboarding() {
           />
         </TouchableOpacity>
       </View>
+      {showOptions && (
+  <Animated.View
+    style={[
+      styles.optionFrame,
+      { transform: [{ translateY: slideAnim }] },
+    ]}
+  >
+    <Text style={styles.optionTitle}>Como você deseja se conectar?</Text>
+    <TouchableOpacity
+      style={styles.optionButton}
+      onPress={() => router.push("/Cadastro/cadastro")}
+    >
+      <Text style={styles.optionButtonText}>Sou paciente</Text>
+    </TouchableOpacity>
+
+    <TouchableOpacity
+      style={styles.optionButton}
+      onPress={() => router.push("/Cadastro-psi/cadastroPsi")}
+    >
+      <Text style={styles.optionButtonText}>Quero me voluntariar</Text>
+    </TouchableOpacity>
+    <TouchableOpacity
+      onPress={() => router.push("/Cadastro-psi/cadastroPsi")}
+    >
+      <Text style={styles.linkVoluntario}>
+        O que é ser um voluntário no MindSync?
+      </Text>
+    </TouchableOpacity>
+
+
+  </Animated.View>
+)}
+
     </View>
   );
 }
@@ -107,4 +152,46 @@ const styles = StyleSheet.create({
     height: 50,
     marginLeft: 90,
   },
+  optionFrame: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#fff",
+    padding: 30,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  optionTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+    color: "#000A74",
+  },
+  optionButton: {
+    backgroundColor: "#000A74",
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 15,
+    alignItems: "center",
+  },
+  optionButtonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  linkVoluntario: {
+    marginTop: 10,
+    textAlign: "center",
+    color: "#000A74",
+    textDecorationLine: "underline",
+    fontSize: 14,
+  }
+  
+  
 });

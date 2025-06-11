@@ -36,10 +36,10 @@ export default function Home() {
       <View style={styles.exploreContainer}>
         
         <View style={styles.row}>
-          <Image source={require("../../assets/educativos.png")} style={styles.exploreImage1} />
+          <Image source={require("../../assets/home-image/espacoEducacional (1).png")} style={styles.exploreImage1} />
           <TouchableOpacity onPress={() => router.push("/Menu-Diario/menu-diario")}>
           <Image
-            source={require("../../assets/diario.png")}
+            source={require("../../assets/home-image/DiarioEmocional (1).png")}
             style={styles.exploreImage2}
           />
 </TouchableOpacity>
@@ -47,9 +47,9 @@ export default function Home() {
 
    
         <View style={styles.row}>
-          <Image source={require("../../assets/chatAI.png")} style={styles.exploreImage3} />
+          <Image source={require("../../assets/home-image/chatAi (2).png")} style={styles.exploreImage3} />
           <TouchableOpacity onPress={()=> router.push("/Grafico/grafico")}>
-          <Image source={require("../../assets/grafico (1).png")} style={styles.exploreImage4} />
+          <Image source={require("../../assets/home-image/graficos (1).png")} style={styles.exploreImage4} />
           </TouchableOpacity>
           
         </View>

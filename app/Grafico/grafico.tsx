@@ -2,22 +2,30 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    Dimensions,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { LineChart, PieChart } from "react-native-chart-kit";
+
+const width = Dimensions.get("window").width - 30;
 
 const meses = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
 ];
 
-const width = Dimensions.get("window").width - 30;
+const reacoesInfo = {
+  alegre: { label: "Alegre", cor: "#FFD700", imagem: require("../../assets/alegre.png") },
+  feliz: { label: "Feliz", cor: "#90EE90", imagem: require("../../assets/feliz (1).png") },
+  indiferente: { label: "Indiferente", cor: "#C0C0C0", imagem: require("../../assets/indiferente.png") },
+  triste: { label: "Triste", cor: "#87CEEB", imagem: require("../../assets/triste (1).png") },
+  raiva: { label: "Raiva", cor: "#FF6347", imagem: require("../../assets/magoado.png") },
+};
 
 export default function Grafico() {
   const router = useRouter();
@@ -27,22 +35,7 @@ export default function Grafico() {
   const [dados, setDados] = useState({});
   const [dadosMes, setDadosMes] = useState<any>({});
 
-  const tipos = ["feliz", "triste", "ansioso"];
-
-  const salvarReacao = async (tipo: string) => {
-    const hoje = new Date().toISOString().split("T")[0];
-    const armazenado = await AsyncStorage.getItem("reacoes");
-    const json = armazenado ? JSON.parse(armazenado) : {};
-
-    if (!json[hoje]) {
-      json[hoje] = { feliz: 0, triste: 0, ansioso: 0 };
-    }
-
-    json[hoje][tipo] += 1;
-
-    await AsyncStorage.setItem("reacoes", JSON.stringify(json));
-    setDados(json); // atualiza para refletir no gráfico
-  };
+  const tipos = Object.keys(reacoesInfo);
 
   const carregarReacoes = async () => {
     const armazenado = await AsyncStorage.getItem("reacoes");
@@ -55,7 +48,6 @@ export default function Grafico() {
   }, []);
 
   useEffect(() => {
-    // Filtra dados do mês atual
     const dadosFiltrados: any = {};
     Object.entries(dados).forEach(([data, valores]: any) => {
       const dataObj = new Date(data);
@@ -89,44 +81,27 @@ export default function Grafico() {
     }
   };
 
-  // Gráfico de Pizza - soma total de reações
-  const totalPorTipo = { feliz: 0, triste: 0, ansioso: 0 };
+  const totalPorTipo = Object.fromEntries(tipos.map((t) => [t, 0]));
   Object.values(dadosMes).forEach((v: any) => {
-    totalPorTipo.feliz += v.feliz;
-    totalPorTipo.triste += v.triste;
-    totalPorTipo.ansioso += v.ansioso;
+    tipos.forEach((tipo) => {
+      totalPorTipo[tipo] += v[tipo] || 0;
+    });
   });
 
-  const dadosPizza = [
-    {
-      name: "Feliz",
-      count: totalPorTipo.feliz,
-      color: "#FFD700",
-      legendFontColor: "#000",
-      legendFontSize: 12,
-    },
-    {
-      name: "Triste",
-      count: totalPorTipo.triste,
-      color: "#00BFFF",
-      legendFontColor: "#000",
-      legendFontSize: 12,
-    },
-    {
-      name: "Ansioso",
-      count: totalPorTipo.ansioso,
-      color: "#FF6347",
-      legendFontColor: "#000",
-      legendFontSize: 12,
-    },
-  ];
+  const dadosPizza = tipos.map((tipo) => ({
+    name: tipo,
+    count: totalPorTipo[tipo],
+    //color: reacoesInfo[tipo].cor,
+    legendFontColor: "#000",
+    legendFontSize: 12,
+  }));
 
-  // Gráfico de Linha - total diário
+  const totalReacoes = Object.values(totalPorTipo).reduce((a, b) => a + b, 0);
+
   const datasOrdenadas = Object.keys(dadosMes).sort();
-  const labels = datasOrdenadas.map((d) => d.slice(8)); // dia
-  const valoresLinha = datasOrdenadas.map(
-    (d) =>
-      dadosMes[d].feliz + dadosMes[d].triste + dadosMes[d].ansioso
+  const labels = datasOrdenadas.map((d) => d.slice(8));
+  const valoresLinha = datasOrdenadas.map((d) =>
+    tipos.reduce((soma, tipo) => soma + (dadosMes[d][tipo] || 0), 0)
   );
 
   return (
@@ -153,45 +128,55 @@ export default function Grafico() {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.reacoes}>
-        {tipos.map((tipo) => (
-          <TouchableOpacity key={tipo} onPress={() => salvarReacao(tipo)} style={styles.reacaoBotao}>
-            <Text style={styles.reacaoTexto}>{tipo.toUpperCase()}</Text>
-          </TouchableOpacity>
-        ))}
+      {/* Retângulo maior com borda cinza e título alinhado à esquerda */}
+      <View style={styles.graficoContainer}>
+        <Text style={styles.graficoTitulo}>Gráfico de humor mensal</Text>
+        <LineChart
+          data={{
+            labels,
+            datasets: [{ data: valoresLinha }],
+          }}
+          width={width - 20} // um pouco menor para caber no padding do container
+          height={220}
+          chartConfig={{
+            backgroundGradientFrom: "#fff",
+            backgroundGradientTo: "#fff",
+            color: () => "#000",
+            labelColor: () => "#000",
+            propsForDots: { r: "4", strokeWidth: "2", stroke: "#ffa726" },
+          }}
+          bezier
+          style={{ borderRadius: 12 }}
+        />
       </View>
 
       <Text style={styles.graficoTitulo}>Distribuição de Reações</Text>
-      <PieChart
-        data={dadosPizza}
-        width={width}
-        height={220}
-        accessor={"count"}
-        backgroundColor={"transparent"}
-        paddingLeft={"15"}
-        chartConfig={{
-          color: () => "#000",
-        }}
-      />
-
-      <Text style={styles.graficoTitulo}>Evolução Diária</Text>
-      <LineChart
-        data={{
-          labels: labels,
-          datasets: [{ data: valoresLinha }],
-        }}
-        width={width}
-        height={220}
-        chartConfig={{
-          backgroundGradientFrom: "#fff",
-          backgroundGradientTo: "#fff",
-          color: () => "#000",
-          labelColor: () => "#000",
-          propsForDots: { r: "4", strokeWidth: "2", stroke: "#ffa726" },
-        }}
-        bezier
-        style={{ marginVertical: 8, borderRadius: 12 }}
-      />
+      <View style={{ alignItems: "center" }}>
+        <PieChart
+          data={dadosPizza}
+          width={width}
+          height={220}
+          accessor={"count"}
+          backgroundColor={"transparent"}
+          paddingLeft={"15"}
+          chartConfig={{
+            color: () => "#000",
+          }}
+          center={[0, 0]}
+          hasLegend={false}
+        />
+        <Text style={{ position: "absolute", top: 100, fontWeight: "bold", fontSize: 16 }}>
+          {totalReacoes}
+        </Text>
+        {/* <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", marginTop: 10 }}>
+          {tipos.map((tipo) => (
+            <View key={tipo} style={{ flexDirection: "row", alignItems: "center", marginHorizontal: 8, marginVertical: 4 }}>
+              <Image source={reacoesInfo[tipo].imagem} style={{ width: 20, height: 20, marginRight: 4 }} />
+              <Text style={{ fontSize: 12 }}>{totalPorTipo[tipo]}</Text>
+            </View>
+          ))}
+        </View> */}
+      </View>
     </ScrollView>
   );
 }
@@ -248,25 +233,17 @@ const styles = StyleSheet.create({
     tintColor: "#000",
     resizeMode: "contain",
   },
-  reacoes: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginVertical: 10,
-  },
-  reacaoBotao: {
-    backgroundColor: "#ececec",
-    padding: 10,
-    borderRadius: 10,
-  },
-  reacaoTexto: {
-    fontWeight: "bold",
-    color: "#333",
-  },
   graficoTitulo: {
     fontSize: 16,
-    fontWeight: "bold",
+    marginBottom: 30,
+    alignSelf: "flex-start",
+    color: "#A1A1A1",
+  },
+  graficoContainer: {
+    borderWidth: 1,
+    borderColor: "#E6E6E6",
+    borderRadius: 12,
+    padding: 20,
     marginTop: 20,
-    marginBottom: 10,
-    alignSelf: "center",
   },
 });
