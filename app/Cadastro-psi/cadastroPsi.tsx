@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -9,14 +10,41 @@ export default function CadastroPsi() {
   const [senha, setSenha] = useState("");
   const [crp, setCrp] = useState("");
 
-  const handleCadastro = () => {
+  const handleCadastro = async () => {
     if (!nome || !email || !senha || !crp) {
       Alert.alert("Erro", "Preencha todos os campos.");
       return;
     }
-
-    Alert.alert("Cadastro concluído", "Seja bem-vindo(a), voluntário!");
-    router.push("/Home-psi/homePsi");
+  
+    try {
+      const response = await fetch("http://localhost:3000/psychologists", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name: nome,
+          email: email,
+          password: senha,
+          crp
+        })
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        await AsyncStorage.setItem("userId", String(data.id));
+        await AsyncStorage.setItem("userName", data.name);
+        Alert.alert("Cadastro concluído", `Bem-vindo(a), ${data.name}!`);
+        router.push("/Home-psi/homePsi");
+      
+      } else {
+        const errorData = await response.json();
+        Alert.alert("Erro ao cadastrar", errorData.message || "Erro desconhecido.");
+      }
+    } catch (error) {
+      Alert.alert("Erro", "Não foi possível conectar ao servidor.");
+      console.error(error);
+    }
   };
 
   return (
@@ -41,7 +69,7 @@ export default function CadastroPsi() {
 
       <View style={styles.formContainer}>
         <Image
-          source={require("../../assets/personal growth-bro 1.png")}
+          source={require("../../assets/cadastro-psi-image/personal growth-bro 1.png")}
           style={styles.imagem}
         />
         <View style={styles.innerForm}>

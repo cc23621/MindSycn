@@ -1,6 +1,8 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View, } from "react-native";
+import { Alert, Image, StyleSheet, Text, View } from "react-native";
+import BotaoPrincipal from "../../components/BotãoPrincipal";
+import Inputs from "../../components/Inputs";
 import api from "../../service/api";
 
 export default function Cadastro() {
@@ -12,48 +14,42 @@ export default function Cadastro() {
   const handleCadastro = async () => {
     try {
       const response = await api.post("/auth/register", {
-        nome,        
+        nome,
         email,
-        password: senha,   
+        password: senha,
       });
-  
-    
+
       Alert.prompt(
         "Verificação de E-mail",
         "Digite o código que você recebeu:",
         async (otp) => {
           try {
-            const verifyResponse = await api.post("/auth/verify-otp", {
+            await api.post("/auth/verify-otp", {
               nome,
               email,
-              otp,  
+              otp,
             });
-  
+
             Alert.alert("Sucesso", "Conta verificada com sucesso!");
             router.push("/Login/login");
-          } catch (error) {
+          } catch {
             Alert.alert("Erro", "Código inválido. Tente novamente.");
           }
         }
       );
-    } catch (error) {
+    } catch {
       Alert.alert("Erro", "Erro ao cadastrar. Tente novamente.");
     }
   };
-  
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Image source={require("../../assets/Arrow 1.png")} style={styles.back} />
-        </TouchableOpacity>
-
+        <Image source={require("../../assets/Arrow 1.png")} style={styles.back} />
         <View style={styles.titleRow}>
           <Text style={styles.textHeader}>Criar uma{"\n"}conta</Text>
           <Image source={require("../../assets/logo (3).png")} style={styles.logo} />
         </View>
-
         <Text style={styles.text}>
           Você já possui uma conta?{" "}
           <Text style={styles.loginText} onPress={() => router.push("/Login/login")}>
@@ -64,38 +60,17 @@ export default function Cadastro() {
 
       <View style={styles.formContainer}>
         <View style={styles.innerForm}>
-          <TextInput
-            style={styles.input}
-            placeholder="Nome completo"
-            placeholderTextColor="#ccc"
-            value={nome}
-            onChangeText={setNome}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            placeholderTextColor="#ccc"
-            keyboardType="email-address"
-            value={email}
-            onChangeText={setEmail}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Senha"
-            placeholderTextColor="#ccc"
-            secureTextEntry
-            value={senha}
-            onChangeText={setSenha}
-          />
-          <TouchableOpacity style={styles.button} onPress={handleCadastro}>
-            <Text style={styles.buttonText}>Cadastrar</Text>
-          </TouchableOpacity>
+          <Inputs placeholder="Nome completo" value={nome} onChangeText={setNome} />
+          <Inputs placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" />
+          <Inputs placeholder="Senha" value={senha} onChangeText={setSenha} secureTextEntry />
+          <BotaoPrincipal titulo="Cadastrar" onPress={handleCadastro} />
         </View>
-        <Image source={require("../../assets/imagem.png")} style={styles.imagem} />
+        <Image source={require("../../assets/cadastro-images/imagem.png")} style={styles.imagem} />
       </View>
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#000A74",
@@ -170,8 +145,8 @@ const styles = StyleSheet.create({
   },
   imagem: {
     width: "100%",
-    height: 200,
-    marginTop: 20,
+    height: 250,
+    marginTop: -10,
     alignSelf: "center",
     resizeMode: "contain",
   },

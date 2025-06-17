@@ -37,7 +37,7 @@ export default function Onboarding() {
       </Text>
 
       <Image
-        source={require("../../assets/Mental health-cuate (3).png")}
+        source={require("../../assets/onboarding-image/Mental health-cuate (3).png")}
         style={styles.imagem}
         resizeMode="cover"
       />
@@ -49,7 +49,7 @@ export default function Onboarding() {
         </Text>
         <TouchableOpacity onPress={showFrame}>
           <Image
-            source={require("../../assets/Seta.png")}
+            source={require("../../assets/onboarding-image/Seta.png")}
             style={styles.imagemIr}
             resizeMode="contain"
           />

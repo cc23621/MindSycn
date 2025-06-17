@@ -87,7 +87,7 @@ export default function Login() {
       </View>
 
       <Image
-        source={require("../../assets/imagem (2).png")}
+        source={require("../../assets/login-images/imagem (2).png")}
         style={styles.imagem}
       />
 
